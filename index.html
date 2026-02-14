@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Will you be my Bubble-tine? 💘</title>
+
+<style>
+:root{
+  --pink:#ff4d88;
+  --pink2:#ff7aa8;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(circle at 50% 20%, #1a0010, #000000 70%);
+  color:white;
+  overflow:hidden;
+}
+
+/* Floating hearts */
+.float-layer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  display:none;
+}
+
+.floater{
+  position:absolute;
+  top:110vh;
+  transform:translate(-50%,0);
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp{
+  from { transform:translate(-50%,0) rotate(0deg); opacity:0; }
+  10%  { opacity:1; }
+  to   { transform:translate(-50%,-130vh) rotate(15deg); opacity:0; }
+}
+
+.card{
+  width:min(900px,92vw);
+  border-radius:28px;
+  background: rgba(20,0,15,.6);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 80px rgba(255,0,100,.2);
+  padding:28px;
+  position:relative;
+  z-index:1;
+}
+
+h1{
+  margin:0 0 10px;
+  font-size:clamp(26px,4vw,44px);
+  text-align:center;
+}
+
+.bubbletine{
+  background:linear-gradient(90deg,var(--pink),var(--pink2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-weight:900;
+}
+
+p{
+  text-align:center;
+  opacity:.85;
+  margin-bottom:25px;
+}
+
+.row{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.stage{
+  width:min(450px,92vw);
+  aspect-ratio:1/1;
+  border-radius:22px;
+  background:#000;
+  display:grid;
+  place-items:end center;
+  padding:12px;
+  overflow:hidden;
+  box-shadow: 0 0 40px rgba(255,0,120,.2);
+}
+
+.idle-layer{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:12px;
+}
+
+.og-img{
+  width:60%;
+  filter: drop-shadow(0 0 20px rgba(255,0,100,.4));
+}
+
+.bubble-img{
+  width:36%;
+  filter: drop-shadow(0 0 20px rgba(255,0,100,.4));
+}
+
+video{
+  width:96%;
+  border-radius:18px;
+}
+
+.controls{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  justify-content:center;
+}
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:12px 18px;
+  font-weight:900;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--pink),var(--pink2));
+  color:white;
+  box-shadow:0 0 30px rgba(255,0,120,.4);
+  transition:.2s;
+}
+
+button.secondary{
+  background:white;
+  color:var(--pink);
+}
+
+button:hover{
+  transform:scale(1.05);
+}
+
+#msg{
+  margin-top:18px;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="float-layer" id="floatLayer"></div>
+
+<main class="card">
+<h1>Will you be my <span class="bubbletine">Bubble-tine</span>? 💘</h1>
+<p>OG is asking Bubble something very important…</p>
+
+<div class="row">
+  <div class="stage">
+    <div id="idleLayer" class="idle-layer">
+      <img class="og-img" src="assets/pocoyo_idle.png">
+      <img class="bubble-img" src="assets/abla_stand.png">
+    </div>
+
+    <video id="danceVideo"
+      playsinline
+      webkit-playsinline
+      preload="auto"
+      style="display:none;">
+      <source src="assets/pocoyo_dance.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div style="flex:1;min-width:250px;">
+    <div class="controls">
+      <button id="yesBtn">Yes 💖</button>
+      <button id="noBtn" class="secondary">No 🙈</button>
+      <button id="resetBtn" class="secondary" style="display:none;">Reset</button>
+    </div>
+    <div id="msg"></div>
+  </div>
+</div>
+</main>
+
+<script>
+const yesBtn=document.getElementById('yesBtn');
+const noBtn=document.getElementById('noBtn');
+const resetBtn=document.getElementById('resetBtn');
+const msg=document.getElementById('msg');
+const idleLayer=document.getElementById('idleLayer');
+const video=document.getElementById('danceVideo');
+const floatLayer=document.getElementById('floatLayer');
+
+let floatInterval=null;
+const floatEmojis=["💗","💖","💘","💕","❤️","💞","🫧","✨"];
+
+function spawnFloater(){
+  const el=document.createElement('div');
+  el.className='floater';
+  el.textContent=floatEmojis[Math.floor(Math.random()*floatEmojis.length)];
+  el.style.left=Math.random()*100+'vw';
+  el.style.fontSize=(18+Math.random()*30)+'px';
+  el.style.animationDuration=(6+Math.random()*6)+'s';
+  floatLayer.appendChild(el);
+  setTimeout(()=>el.remove(),12000);
+}
+
+function startFloating(){
+  floatLayer.style.display="block";
+  for(let i=0;i<20;i++) setTimeout(spawnFloater,i*60);
+  floatInterval=setInterval(spawnFloater,300);
+}
+
+function stopFloating(){
+  clearInterval(floatInterval);
+  floatLayer.style.display="none";
+  floatLayer.innerHTML="";
+}
+
+async function startDance(){
+  msg.textContent="OG is dancing for Bubble 💞";
+  startFloating();
+  idleLayer.style.display="none";
+  video.style.display="block";
+  resetBtn.style.display="inline-block";
+  video.currentTime=0;
+  video.loop=true;
+  await video.play();
+}
+
+function reset(){
+  msg.textContent="";
+  stopFloating();
+  video.pause();
+  video.currentTime=0;
+  video.style.display="none";
+  idleLayer.style.display="flex";
+  resetBtn.style.display="none";
+}
+
+yesBtn.addEventListener('click',startDance);
+
+noBtn.addEventListener('click',()=>{
+  msg.textContent="Bubble deserves a YES 😤";
+  noBtn.style.transform=
+  `translate(${(Math.random()*120-60).toFixed(0)}px, ${(Math.random()*60-30).toFixed(0)}px)`;
+  setTimeout(()=>noBtn.style.transform="translate(0,0)",350);
+});
+
+resetBtn.addEventListener('click',reset);
+</script>
+
+</body>
+</html>
